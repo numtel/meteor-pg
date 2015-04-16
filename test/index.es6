@@ -1,84 +1,82 @@
-// numtel:mysql
+// numtel:pg
 // MIT License, ben@latenightsketches.com
-// test/index.js
+// test/index.es6
+
+var CONN_STR = Meteor.settings.connStr;
 
 // Configure publications
-var database = Meteor.settings.mysql.database;
-
-if(Meteor.settings.recreateDb){
-  // Primarily for Travis CI compat
-  delete Meteor.settings.mysql.database;
-}
-
-var liveDb = new LiveMysql(Meteor.settings.mysql);
-
-if(Meteor.settings.recreateDb){
-  querySequence(liveDb.db, [
-    'DROP DATABASE IF EXISTS ' + liveDb.db.escapeId(database),
-    'CREATE DATABASE ' + liveDb.db.escapeId(database),
-    'USE ' + liveDb.db.escapeId(database),
-  ]);
-}
+var liveDb = new LivePg(CONN_STR, Meteor.settings.channel);
 
 Meteor.startup(function(){
   insertSampleData();
 
   Meteor.publish('allPlayers', function(limit){
+    if(typeof limit !== 'undefined') {
+      check(limit, Number);
+    }
+
     return liveDb.select(
       'SELECT * FROM players ORDER BY score DESC' +
-        (limit ? ' LIMIT ' + liveDb.db.escape(limit) : ''),
-      [ { database, table: 'players' } ]
+        (limit ? ' LIMIT ' + limit : '')
     );
   });
 
   Meteor.publish('playerScore', function(name){
+    check(name, String);
+    
     return liveDb.select(
-      `SELECT id, score FROM players WHERE name = ${liveDb.db.escape(name)}`,
-      [
-        {
-          database,
-          table: 'players',
-          condition: function(row, newRow){
-            return row.name === name;
-          }
+      `SELECT id, score FROM players WHERE name = $1`, [ name ],
+      {
+        'players': function(row){
+          return row.name === name;
         }
-      ]
+      }
     );
   });
 
   Meteor.methods({
     'setScore': function(id, value){
-      return querySequence(liveDb.db, [`
-        UPDATE players
-        SET score = ${liveDb.db.escape(value)}
-        WHERE id = ${liveDb.db.escape(id)}
-      `]);
+      check(id, Number);
+      check(value, Number);
+
+      return querySequence(CONN_STR, [ [
+        'UPDATE players SET score = $1 WHERE id = $2', [ value, id ]
+      ] ]);
     },
     'insPlayer': function(name, score){
-      return querySequence(liveDb.db, [`
-        INSERT INTO players (name, score) VALUES
-          (${liveDb.db.escape(name)}, ${liveDb.db.escape(score)})
-      `]);
+      check(name, String);
+      check(score, Number);
+
+      return querySequence(CONN_STR, [ [
+        'INSERT INTO players (name, score) VALUES ($1, $2)',
+        [ name, score ]
+      ] ]);
     },
     'delPlayer': function(name){
-      return querySequence(liveDb.db,
-        [`DELETE FROM players WHERE name = ${liveDb.db.escape(name)}`]);
+      check(name, String);
+
+      return querySequence(CONN_STR,
+        [ [ 'DELETE FROM players WHERE name = $1', [ name ] ] ]);
     },
   });
 
 });
 
 var insertSampleData = function(){
-  querySequence(liveDb.db, [
+  querySequence(CONN_STR, [
     `DROP TABLE IF EXISTS players`,
-    `CREATE TABLE players (
-      id int(11) NOT NULL AUTO_INCREMENT,
-      name varchar(45) DEFAULT NULL,
-      score int(11) NOT NULL DEFAULT '0',
-      PRIMARY KEY (id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;`,
+    `CREATE TABLE players
+    (
+      id serial NOT NULL,
+      name character varying(50),
+      score integer NOT NULL,
+      CONSTRAINT players_pkey PRIMARY KEY (id)
+    )
+    WITH (
+      OIDS=FALSE
+    )`,
     `INSERT INTO players (name, score) VALUES
-      ('Kepler', 40),('Leibniz',50),('Maxwell',60),('Planck',70);`
+      ('Kepler', 40),('Leibniz',50),('Maxwell',60),('Planck',70)`
   ]);
 };
 

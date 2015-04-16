@@ -1,15 +1,15 @@
-// numtel:mysql
+// numtel:pg
 // MIT License, ben@latenightsketches.com
-// test/MysqlSubscription.js
+// test/PgSubscription.js
 
-var SUITE_PREFIX = 'numtel:mysql - MysqlSubscription - ';
+var SUITE_PREFIX = 'numtel:pg - PgSubscription - ';
 var POLL_WAIT = 700; // update allowance
 var LOAD_COUNT = 10;
 
-players = new MysqlSubscription('allPlayers');
-myScore = new MysqlSubscription('playerScore', 'Maxwell');
+players = new PgSubscription('allPlayers');
+myScore = new PgSubscription('playerScore', 'Maxwell');
 
-var expectedRows = [ // test/mysql.js :: insertSampleData()
+var expectedRows = [ // test/index.es6 :: insertSampleData()
   { name: 'Planck', score: 70 },
   { name: 'Maxwell', score: 60 },
   { name: 'Leibniz', score: 50 },
@@ -28,30 +28,11 @@ Tinytest.addAsync(SUITE_PREFIX + 'Insert / Delete Row Sync',
 function(test, done){
   var newPlayer = 'Archimedes';
   var eventRecords = [];
-  players.addEventListener('update.test1', function(index, msg){
-    test.equal(typeof index, 'number');
-    test.equal(typeof msg, 'object');
-    test.equal(arguments.length, 2);
+  players.addEventListener('update.test1', function(diff, data){
     eventRecords.push('update');
   });
-  players.addEventListener('added.test1', function(index, newRow){
-    test.equal(typeof index, 'number');
-    test.equal(typeof newRow, 'object');
-    test.equal(arguments.length, 2);
-    eventRecords.push('added');
-  });
-  players.addEventListener('changed.test1', function(index, oldRow, newRow){
-    test.equal(typeof index, 'number');
-    test.equal(typeof oldRow, 'object');
-    test.equal(typeof newRow, 'object');
-    test.equal(arguments.length, 3);
-    eventRecords.push('changed');
-  });
-  players.addEventListener('removed.test1', function(index, oldRow){
-    test.equal(typeof index, 'number');
-    test.equal(typeof oldRow, 'object');
-    test.equal(arguments.length, 2);
-    eventRecords.push('removed');
+  players.addEventListener('updated.test1', function(diff, data){
+    eventRecords.push('updated');
   });
   Meteor.call('insPlayer', newPlayer, 100);
   Meteor.setTimeout(function(){
@@ -61,11 +42,8 @@ function(test, done){
     Meteor.call('delPlayer', newPlayer);
     Meteor.setTimeout(function(){
       players.removeEventListener(/test1/);
-      test.equal(expectResult(eventRecords, [
-        'update', 'changed', 'update', 'changed', 'update', 'changed',
-        'update', 'changed', 'update', 'added', 'update', 'changed',
-        'update', 'changed', 'update', 'changed', 'update', 'changed',
-        'update', 'removed']), true, 'Expected events firing');
+      test.equal(expectResult(eventRecords, [ 'update', 'updated']), true,
+        'Expected events firing');
       test.equal(expectResult(players, expectedRows), true, 'Row removed');
       done();
     }, POLL_WAIT);
@@ -170,7 +148,7 @@ Tinytest.addAsync(SUITE_PREFIX + 'Multiple Connections', function(test, done){
   _.each(newPlayers, function(newPlayer){
     Meteor.call('insPlayer', newPlayer.name, newPlayer.score);
     newPlayer.subscription =
-      new MysqlSubscription('playerScore', newPlayer.name);
+      new PgSubscription('playerScore', newPlayer.name);
     newPlayer.subscription.addEventListener('update', function(){
       newPlayer.subscription.removeEventListener('update');
       newPlayer.done = true;
@@ -193,16 +171,16 @@ function(test, done){
   var checkDone = function(){
     if(players.length === playersStartLength){
       test.equal(expectResult(players, expectedRows), true);
-      players.removeEventListener('removed');
+      players.removeEventListener('updated');
       done();
     }
   };
 
-  players.addEventListener('added', function(){
+  players.addEventListener('updated', function(){
     if(players.length === playersStartLength + LOAD_COUNT){
       Meteor.setTimeout(function(){
-        players.removeEventListener('added');
-        players.addEventListener('removed', checkDone);
+        players.removeEventListener('updated');
+        players.addEventListener('updated', checkDone);
         _.each(newPlayers, function(newPlayer){
           Meteor.call('delPlayer', newPlayer.name);
         });
@@ -218,7 +196,7 @@ function(test, done){
 
 Tinytest.addAsync(SUITE_PREFIX + 'Stop Method',
 function(test, done){
-  var testSub = new MysqlSubscription('allPlayers');
+  var testSub = new PgSubscription('allPlayers');
   testSub.addEventListener('update', function(){
     testSub.removeEventListener('update');
     Meteor.setTimeout(function(){
@@ -227,7 +205,7 @@ function(test, done){
   });
 
   var testSubReady = function(){
-    testSub.addEventListener('added.stop', function(){
+    testSub.addEventListener('updated.stop', function(){
       test.equal(0, 1, 'Added event should not have been emitted');
     });
 
@@ -237,10 +215,10 @@ function(test, done){
 
     // Wait to see if added event dispatches
     Meteor.setTimeout(function(){
-      testSub.removeEventListener('added.stop');
+      testSub.removeEventListener('updated.stop');
       Meteor.call('delPlayer', 'After Stop');
-      players.addEventListener('removed.afterStop', function(){
-        players.removeEventListener('removed.afterStop');
+      players.addEventListener('updated.afterStop', function(){
+        players.removeEventListener('updated.afterStop');
         done();
       });
     }, 200);

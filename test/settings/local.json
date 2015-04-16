@@ -1,11 +1,4 @@
 {
-  "mysql": {
-    "host"        : "localhost",
-    "user"        : "root",
-    "password"    : "numtel",
-    "database"    : "test_package",
-    "serverId"    : 129,
-    "minInterval" : 200
-  },
-  "recreateDb": false
+  "connStr": "postgres://meteor:meteor@127.0.0.1/meteor_test",
+  "channel": "numtel_pg_test"
 }

@@ -1,6 +1,6 @@
-// numtel:mysql
+// numtel:pg
 // MIT License, ben@latenightsketches.com
-// test/helper.randomString.js, test/performance/server/randomString.js
+// test/helper.randomString.js
 
 randomString = function(length){
   var text = "",

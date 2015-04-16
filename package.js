@@ -1,13 +1,13 @@
 Package.describe({
-  name: 'numtel:mysql',
-  summary: 'MySQL support with Reactive Select Subscriptions',
-  version: '0.1.7',
-  git: 'https://github.com/numtel/meteor-mysql.git'
+  name: 'numtel:pg',
+  summary: 'PostgreSQL support with Reactive Select Subscriptions',
+  version: '0.0.1',
+  git: 'https://github.com/numtel/meteor-pg.git'
 });
 
 Npm.depends({
-  'mysql': '2.6.1',
-  'mysql-live-select': '0.0.18'
+  'pg': '4.3.0',
+  'pg-live-select': '0.0.6'
 });
 
 Package.onUse(function(api) {
@@ -18,11 +18,12 @@ Package.onUse(function(api) {
     'tracker'
   ]);
 
-  api.addFiles('lib/LiveMysql.js', 'server');
-  api.export('LiveMysql', 'server');
+  api.addFiles('lib/LivePg.js', 'server');
+  api.export('LivePg', 'server');
+  api.export('pg', 'server');
 
-  api.addFiles('lib/MysqlSubscription.js');
-  api.export('MysqlSubscription');
+  api.addFiles('lib/PgSubscription.js');
+  api.export('PgSubscription');
 });
 
 Package.onTest(function(api) {
@@ -33,7 +34,7 @@ Package.onTest(function(api) {
     'autopublish',
     'insecure',
     'grigio:babel@0.1.1',
-    'numtel:mysql'
+    'numtel:pg'
   ]);
   api.use('test-helpers'); // Did not work concatenated above
   api.addFiles([
@@ -52,6 +53,6 @@ Package.onTest(function(api) {
   ], 'server');
 
   api.addFiles([
-    'test/MysqlSubscription.js'
+    'test/PgSubscription.js'
   ]);
 });

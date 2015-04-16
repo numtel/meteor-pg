@@ -1,4 +1,4 @@
-// numtel:mysql
+// numtel:pg
 // MIT License, ben@latenightsketches.com
 // test/helper.expectResult.js
 
