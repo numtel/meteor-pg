@@ -11,6 +11,8 @@ Provides Meteor integration of the [`pg-live-select` NPM module](https://github.
 
 This package provides the `LivePg` class as defined in the [`pg-live-select` NPM package](https://github.com/numtel/pg-live-select).
 
+Also exposed on the server is the `pg` object as defined in the [`node-postgres` NPM package](https://github.com/brianc/node-postgres) (useful for other operations like `INSERT` and `UPDATE`).
+
 ### `LivePg.prototype.select()`
 
 In this Meteor package, the `SelectHandle` object returned by the `select()` method is modified to act as a cursor that can be published.
@@ -63,7 +65,7 @@ Name | Listener Arguments | Description
 
 ## Closing connections between hot code-pushes
 
-With Meteor's hot code-push feature, a new connection the database server is requested with each restart. In order to close old connections, a handler to your application process's `SIGTERM` signal event must be added that calls the `end()` method on each `LivePg` instance in your application. Also, a handler for `SIGINT` can be used to close connections on exit.
+With Meteor's hot code-push feature, new triggers and functions on database server are created with each restart. In order to remove old items, a handler to your application process's `SIGTERM` signal event must be added that calls the `cleanup()` method on each `LivePg` instance in your application. Also, a handler for `SIGINT` can be used to close connections on exit.
 
 On the server-side of your application, add event handlers like this:
 
@@ -101,7 +103,7 @@ $ cd meteor-pg
 # (an empty database is suggested)
 $ ed test/settings/local.json
 
-# Run test/benchmark server
+# Run test server
 $ meteor test-packages --settings test/settings/local.json ./
 
 ```
