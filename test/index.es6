@@ -10,6 +10,10 @@ var liveDb = new LivePg(CONN_STR, Meteor.settings.channel);
 Meteor.startup(function(){
   insertSampleData();
 
+  Meteor.publish('errorRaising', function(){
+    return liveDb.select('SELECT * FROM not_existing ORDER BY score DESC');
+  });
+
   Meteor.publish('allPlayers', function(limit){
     if(typeof limit !== 'undefined') {
       check(limit, Number);

@@ -6,6 +6,9 @@ var SUITE_PREFIX = 'numtel:pg - PgSubscription - ';
 var POLL_WAIT = 700; // update allowance
 var LOAD_COUNT = 10;
 
+// Test error handling
+errorSub = new PgSubscription('errorRaising');
+
 players = new PgSubscription('allPlayers');
 myScore = new PgSubscription('playerScore', 'Maxwell');
 
