@@ -1,13 +1,13 @@
 Package.describe({
   name: 'numtel:pg',
   summary: 'PostgreSQL support with Reactive Select Subscriptions',
-  version: '0.0.3',
+  version: '0.0.4',
   git: 'https://github.com/numtel/meteor-pg.git'
 });
 
 Npm.depends({
   'pg': '4.3.0',
-  'pg-live-select': '0.0.9'
+  'pg-live-select': '0.0.10'
 });
 
 Package.onUse(function(api) {
@@ -34,6 +34,7 @@ Package.onTest(function(api) {
     'autopublish',
     'insecure',
     'grigio:babel@0.1.1',
+    'numtel:pg-server@0.0.1',
     'numtel:pg'
   ]);
   api.use('test-helpers'); // Did not work concatenated above
@@ -48,6 +49,7 @@ Package.onTest(function(api) {
   ], 'client');
 
   api.addFiles([
+    'test/settings/test.pg.json', // Change Postgres port in this file
     'test/helpers/querySequence.js',
     'test/index.es6'
   ], 'server');

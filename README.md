@@ -1,7 +1,10 @@
-# numtel:pg
+# numtel:pg [![Build Status](https://travis-ci.org/numtel/meteor-pg.svg?branch=master)](https://travis-ci.org/numtel/meteor-pg)
+
 Reactive PostgreSQL for Meteor
 
 Provides Meteor integration of the [`pg-live-select` NPM module](https://github.com/numtel/pg-live-select), bringing reactive `SELECT` statement result sets from PostgreSQL >= 9.3.
+
+> If you do not have PostgreSQL server already installed, you may use [the numtel:pg-server Meteor Package](https://github.com/numtel/meteor-pg-server) to bundle the PostgreSQL server directly to your Meteor application.
 
 * [How to publish joined queries that update efficiently](https://github.com/numtel/meteor-pg/wiki/Publishing-Efficient-Joined-Queries)
 * [Leaderboard example modified to use PostgreSQL](https://github.com/numtel/meteor-pg-leaderboard)
@@ -85,7 +88,7 @@ process.on('SIGINT', closeAndExit);
 
 ## Tests / Benchmarks
 
-A PostgreSQL server is required to run the test suite.
+The test suite does not require a separate Postgres server installation as it uses [the `numtel:pg-server` package](https://github.com/numtel/meteor-pg-server) to run the tests.
 
 The database connection settings must be configured in `test/settings/local.json`.
 
@@ -99,12 +102,13 @@ $ curl -L https://install.meteor.com/ | /bin/sh
 $ git clone https://github.com/numtel/meteor-pg.git
 $ cd meteor-pg
 
-# Configure database settings in your favorite editor
-# (an empty database is suggested)
-$ ed test/settings/local.json
+# Optionally, configure port and data dir in test/settings/test.pg.json.
+# If changing port, keep port value updated in test/index.es6 as well.
+
+# Test database will be created in dbtest directory.
 
 # Run test server
-$ meteor test-packages --settings test/settings/local.json ./
+$ meteor test-packages ./
 
 ```
 

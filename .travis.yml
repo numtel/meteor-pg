@@ -1,11 +1,6 @@
+sudo: required
 language: node_js
-env: TEST_COMMAND=./travis.sh
 node_js:
   - "0.10"
 before_install:
   - "curl -L http://git.io/ejPSng | /bin/sh"
-before_script:
-  - sudo apt-get install libaio1 libaio-dev
-  - ./test/settings/travis-install.sh
-after_script:
-  - kill $(cat mysql-5.5.41-linux2.6-x86_64/mysql.pid)

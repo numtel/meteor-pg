@@ -2,10 +2,19 @@
 // MIT License, ben@latenightsketches.com
 // test/index.es6
 
-var CONN_STR = Meteor.settings.connStr;
+var PORT = 54321 // From test/settings/test.pg.json
+
+var CONN_STR = Meteor.settings.connStr ||
+  'postgres://' // Using numtel:pg-server to run tests
+  + process.env.USER + ':' // Default user is same as system user
+  + 'numtel'               // From defaultpw file in NPM package
+  + '@localhost:' + PORT   // Port as specified in .pg.json file (default: 5432)
+  + '/postgres'           // Default database
+
+var CHANNEL = Meteor.settings.channel || 'test_channel'
 
 // Configure publications
-var liveDb = new LivePg(CONN_STR, Meteor.settings.channel);
+var liveDb = new LivePg(CONN_STR, CHANNEL);
 
 Meteor.startup(function(){
   insertSampleData();
