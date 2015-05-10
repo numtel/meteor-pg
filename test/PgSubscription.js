@@ -53,6 +53,35 @@ function(test, done){
   }, POLL_WAIT);
 });
 
+Tinytest.addAsync(SUITE_PREFIX + 'Empty initial result set',
+function(test, done){
+  var newPlayer = 'Weber';
+  var newScore = new PgSubscription('playerScore', newPlayer);
+  var updateCount = 0;
+
+  newScore.addEventListener('updated.test1', function(diff, data){
+    updateCount++;
+    if(updateCount === 1) {
+      // Step 1: receive empty data
+      test.ok(diff.added instanceof Array);
+      test.equal(diff.added.length, 0);
+      Meteor.call('insPlayer', newPlayer, 100);
+    } else if(updateCount === 2) {
+      // Step 2: recieve one result
+      test.equal(diff.added.length, 1);
+      test.equal(data[0].score, 100);
+      Meteor.call('delPlayer', newPlayer);
+    } else if(updateCount === 3) {
+      // Step 3: back to zero results
+      test.equal(diff.added, null);
+      test.equal(diff.removed.length, 1);
+      newScore.removeEventListener(/test1/);
+      newScore.stop();
+      done();
+    }
+  });
+});
+
 Tinytest.addAsync(SUITE_PREFIX + 'Conditional Trigger Update',
 function(test, done){
   Meteor.setTimeout(function(){
