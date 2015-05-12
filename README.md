@@ -77,7 +77,8 @@ On the server-side of your application, add event handlers like this:
 var liveDb = new LivePg(CONNECTION_STRING, CHANNEL);
 
 var closeAndExit = function() {
-  liveDb.cleanup().then(process.exit);
+  // Call process.exit() as callback
+  liveDb.cleanup(process.exit);
 };
 
 // Close connections on hot code push
