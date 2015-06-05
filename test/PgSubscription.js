@@ -257,6 +257,29 @@ function(test, done){
   };
 });
 
+Tinytest.addAsync(SUITE_PREFIX + 'Change Method to empty',
+function(test, done){
+  test.equal(players.length, expectedRows.length);
+  test.isTrue(players.ready());
+
+  // Limit players sub to 0 rows
+  players.change(0);
+  test.isFalse(players.ready());
+  
+  Meteor.setTimeout(function() {
+    test.equal(players.length, 0);
+    test.isTrue(players.ready());
+
+    // Reset players to original state
+    players.change();
+
+    Meteor.setTimeout(function() {
+      test.equal(players.length, expectedRows.length);
+      done();
+    }, POLL_WAIT);
+  }, POLL_WAIT);
+});
+
 Tinytest.addAsync(SUITE_PREFIX + 'Change Method',
 function(test, done){
   test.equal(players.length, expectedRows.length);
