@@ -302,3 +302,15 @@ function(test, done){
     }, POLL_WAIT);
   }, POLL_WAIT);
 });
+
+Tinytest.addAsync(SUITE_PREFIX + 'Quick Change',
+function(test, done){
+  for (var i = 0; i < expectedRows.length; i++) {
+    players.change(i);
+  }
+  players.change();
+  Meteor.setTimeout(function () {
+    test.equal(players.length, expectedRows.length);
+    done();
+  }, POLL_WAIT);
+});
