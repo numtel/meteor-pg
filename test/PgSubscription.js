@@ -265,7 +265,7 @@ function(test, done){
   // Limit players sub to 0 rows
   players.change(0);
   test.isFalse(players.ready());
-  
+
   Meteor.setTimeout(function() {
     test.equal(players.length, 0);
     test.isTrue(players.ready());
@@ -288,7 +288,7 @@ function(test, done){
   // Limit players sub to 1 row
   players.change(1);
   test.isFalse(players.ready());
-  
+
   Meteor.setTimeout(function() {
     test.equal(players.length, 1);
     test.isTrue(players.ready());
