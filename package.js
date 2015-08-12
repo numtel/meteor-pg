@@ -1,13 +1,13 @@
 Package.describe({
   name: 'numtel:pg',
   summary: 'PostgreSQL support with Reactive Select Subscriptions',
-  version: '1.0.1',
+  version: '1.0.2',
   git: 'https://github.com/numtel/meteor-pg.git'
 });
 
 Npm.depends({
   'pg': '4.3.0',
-  'pg-live-select': '1.0.2'
+  'pg-live-select': '1.0.3'
 });
 
 Package.onUse(function(api) {
